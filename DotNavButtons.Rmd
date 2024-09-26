@@ -1,6 +1,6 @@
 
 
-# Dot Nav with 3 images, Arrows -- Full Loop
+# Final Version: Dot Nav with 3 images, Arrows -- Full Loop
 ```{r}
 
 # Required libraries
@@ -177,9 +177,12 @@ shinyApp(ui, server)
 
 ```
 
+##################
+##################
+##################
+##################
 
-
-# 3 images, Arrows - no loop
+# Attempt #2: 3 images, Arrows - no loop
 ```{r}
 
 
@@ -345,12 +348,12 @@ shinyApp(ui, server)
 
 ```
 
-
-
-
+##################
+##################
+##################
 ##################
 
-Dot nav
+# Attempt #1: Dot nav
 ```{r}
 
 library(shiny)
