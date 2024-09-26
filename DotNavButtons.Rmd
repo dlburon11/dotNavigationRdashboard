@@ -1,0 +1,421 @@
+
+
+# Dot Nav with 3 images, Arrows -- Full Loop
+```{r}
+
+# Required libraries
+library(shiny)
+library(shinydashboard)
+library(ggplot2)
+library(shinyjs)
+
+# UI definition
+ui <- dashboardPage(
+    dashboardHeader(
+        # Header content
+    ),
+    dashboardSidebar(
+        # Sidebar content
+    ),
+    dashboardBody(
+        useShinyjs(),
+
+        # Custom CSS for navigation and arrows
+        tags$head(
+            tags$style(HTML("
+            
+            /* Dot Nav CSS */
+                .pagination-wrapper {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .btn {
+                    cursor: pointer;
+                    margin: 0 10px;
+                }
+                .nav-dot {
+                    height: 10px;
+                    width: 10px;
+                    background-color: #bbb;
+                    border-radius: 50%;
+                    display: inline-block;
+                    margin: 2px;
+                }
+                .nav-dot.active {
+                    background-color: #717171;
+                }
+            ")),
+
+            # JavaScript for navigation
+            tags$script(HTML("
+            
+            /* Dot Nav JS */
+                function navigateDot(isNext) {
+                    var activeDot = $('#dot-navigation .nav-dot.active');
+                    var newActiveDot;
+
+                    if (isNext) {
+                        newActiveDot = activeDot.next('.nav-dot').length ? activeDot.next('.nav-dot') : $('#dot-navigation .nav-dot').first();
+                    } else {
+                        newActiveDot = activeDot.prev('.nav-dot').length ? activeDot.prev('.nav-dot') : $('#dot-navigation .nav-dot').last();
+                    }
+
+                    if(newActiveDot.length) {
+                        newActiveDot.click();
+                    }
+                }
+
+                $(document).on('click', '#next-arrow', function() {
+                    navigateDot(true);
+                });
+
+                $(document).on('click', '#prev-arrow', function() {
+                    navigateDot(false);
+                });
+                  
+                  /* Prodoscore Dot Nav Page */
+                $(document).on('click', '.nav-dot', function() {
+                    var dotId = $(this).attr('id');
+                    if(dotId === 'dot-1') {
+                        Shiny.setInputValue('dot_navigation', 1);
+                    } else if(dotId === 'dot-2') {
+                        Shiny.setInputValue('dot_navigation', 2);
+                    } else if(dotId === 'dot-3') {
+                        Shiny.setInputValue('dot_navigation', 3);
+                    }
+                    $('.nav-dot').removeClass('active');
+                    $(this).addClass('active');
+                });
+            "))
+        ),
+
+        # Navigation UI with clickable arrows
+        tags$div(class = "pagination-wrapper",
+            tags$div(id = "prev-arrow", class = "btn",
+                tags$svg(height = "24", viewBox = "0 0 24 24", width = "24",
+                    tags$path(d = "M15.41 16.09l-4.58-4.59 4.58-4.59L14 5.5l-6 6 6 6z")
+                )
+            ),
+            tags$div(id = "dot-navigation",
+                tags$div(id = "dot-1", class = "nav-dot active"),
+                tags$div(id = "dot-2", class = "nav-dot"),
+                tags$div(id = "dot-3", class = "nav-dot")
+            ),
+            tags$div(id = "next-arrow", class = "btn",
+                tags$svg(height = "24", viewBox = "0 0 24 24", width = "24",
+                    tags$path(d = "M8.59 16.34l4.58-4.59-4.58-4.59L10 5.75l6 6-6 6z")
+                )
+            )
+        ),
+
+        # Plot outputs
+        plotOutput("barPlot"),
+        plotOutput("pieChart"),
+        plotOutput("lineGraph")
+    )
+)
+
+# Server logic
+server <- function(input, output, session) {
+    # Initialize the bar plot as visible and the others as hidden
+    shinyjs::show("barPlot")
+    shinyjs::hide("pieChart")
+    shinyjs::hide("lineGraph")
+
+    # Observer to show/hide plots based on dot navigation
+    observe({
+        if (!is.null(input$dot_navigation)) {
+            if (input$dot_navigation == 1) {
+                shinyjs::show("barPlot")
+                shinyjs::hide("pieChart")
+                shinyjs::hide("lineGraph")
+            } else if (input$dot_navigation == 2) {
+                shinyjs::hide("barPlot")
+                shinyjs::show("pieChart")
+                shinyjs::hide("lineGraph")
+            } else if (input$dot_navigation == 3) {
+                shinyjs::hide("barPlot")
+                shinyjs::hide("pieChart")
+                shinyjs::show("lineGraph")
+            }
+        }
+    })
+
+    # Bar Plot
+    output$barPlot <- renderPlot({
+        ggplot(mtcars, aes(factor(cyl))) +
+            geom_bar() +
+            theme_minimal() +
+            labs(title = "Bar Plot of Cylinder Counts", x = "Cylinders", y = "Count")
+    })
+
+    # Pie Chart
+    output$pieChart <- renderPlot({
+        pie_data <- as.data.frame(table(mtcars$cyl))
+        colnames(pie_data) <- c("cyl", "count")
+        ggplot(pie_data, aes(x = "", y = count, fill = factor(cyl))) +
+            geom_bar(width = 1, stat = "identity") +
+            coord_polar("y") +
+            theme_void() +
+            labs(fill = "Cylinders")
+    })
+
+    # Line Graph
+    output$lineGraph <- renderPlot({
+        ggplot(mtcars, aes(x = wt, y = mpg)) +
+            geom_line() +
+            theme_minimal() +
+            labs(title = "Line Graph of MPG vs Weight", x = "Weight", y = "MPG")
+    })
+}
+
+# Run the application
+shinyApp(ui, server)
+
+
+
+```
+
+
+
+# 3 images, Arrows - no loop
+```{r}
+
+
+# Required libraries
+library(shiny)
+library(shinydashboard)
+library(ggplot2)
+library(shinyjs)
+
+# UI definition
+ui <- dashboardPage(
+    dashboardHeader(
+        # Header content
+    ),
+    dashboardSidebar(
+        # Sidebar content
+    ),
+    dashboardBody(
+        useShinyjs(),
+
+        # Custom CSS for navigation and arrows
+        tags$head(
+            tags$style(HTML("
+                .pagination-wrapper {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .btn {
+                    cursor: pointer;
+                    margin: 0 10px;
+                }
+                .nav-dot {
+                    height: 10px;
+                    width: 10px;
+                    background-color: #bbb;
+                    border-radius: 50%;
+                    display: inline-block;
+                    margin: 2px;
+                }
+                .nav-dot.active {
+                    background-color: #717171;
+                }
+            ")),
+
+            # JavaScript for navigation
+            tags$script(HTML("
+                function navigateDot(isNext) {
+                    var activeDot = $('#dot-navigation .nav-dot.active');
+                    var newActiveDot = isNext ? activeDot.next('.nav-dot') : activeDot.prev('.nav-dot');
+                    if(newActiveDot.length) {
+                        newActiveDot.click();
+                    }
+                }
+
+                $(document).on('click', '#next-arrow', function() {
+                    navigateDot(true);
+                });
+
+                $(document).on('click', '#prev-arrow', function() {
+                    navigateDot(false);
+                });
+
+                $(document).on('click', '.nav-dot', function() {
+                    var dotId = $(this).attr('id');
+                    if(dotId === 'dot-1') {
+                        Shiny.setInputValue('dot_navigation', 1);
+                    } else if(dotId === 'dot-2') {
+                        Shiny.setInputValue('dot_navigation', 2);
+                    } else if(dotId === 'dot-3') {
+                        Shiny.setInputValue('dot_navigation', 3);
+                    }
+                    $('.nav-dot').removeClass('active');
+                    $(this).addClass('active');
+                });
+            "))
+        ),
+
+        # Navigation UI with clickable arrows
+        tags$div(class = "pagination-wrapper",
+            tags$div(id = "prev-arrow", class = "btn",
+                tags$svg(height = "24", viewBox = "0 0 24 24", width = "24",
+                    tags$path(d = "M15.41 16.09l-4.58-4.59 4.58-4.59L14 5.5l-6 6 6 6z")
+                )
+            ),
+            tags$div(id = "dot-navigation",
+                tags$div(id = "dot-1", class = "nav-dot active"),
+                tags$div(id = "dot-2", class = "nav-dot"),
+                tags$div(id = "dot-3", class = "nav-dot")
+            ),
+            tags$div(id = "next-arrow", class = "btn",
+                tags$svg(height = "24", viewBox = "0 0 24 24", width = "24",
+                    tags$path(d = "M8.59 16.34l4.58-4.59-4.58-4.59L10 5.75l6 6-6 6z")
+                )
+            )
+        ),
+
+        # Plot outputs
+        plotOutput("barPlot"),
+        plotOutput("pieChart"),
+        plotOutput("lineGraph")
+    )
+)
+
+# Server logic
+server <- function(input, output, session) {
+    # Initialize the bar plot as visible and the others as hidden
+    shinyjs::show("barPlot")
+    shinyjs::hide("pieChart")
+    shinyjs::hide("lineGraph")
+
+    # Observer to show/hide plots based on dot navigation
+    observe({
+        if (!is.null(input$dot_navigation)) {
+            if (input$dot_navigation == 1) {
+                shinyjs::show("barPlot")
+                shinyjs::hide("pieChart")
+                shinyjs::hide("lineGraph")
+            } else if (input$dot_navigation == 2) {
+                shinyjs::hide("barPlot")
+                shinyjs::show("pieChart")
+                shinyjs::hide("lineGraph")
+            } else if (input$dot_navigation == 3) {
+                shinyjs::hide("barPlot")
+                shinyjs::hide("pieChart")
+                shinyjs::show("lineGraph")
+            }
+        }
+    })
+
+    # Bar Plot
+    output$barPlot <- renderPlot({
+        ggplot(mtcars, aes(factor(cyl))) +
+            geom_bar() +
+            theme_minimal() +
+            labs(title = "Bar Plot of Cylinder Counts", x = "Cylinders", y = "Count")
+    })
+
+    # Pie Chart
+    output$pieChart <- renderPlot({
+        pie_data <- as.data.frame(table(mtcars$cyl))
+        colnames(pie_data) <- c("cyl", "count")
+        ggplot(pie_data, aes(x = "", y = count, fill = factor(cyl))) +
+            geom_bar(width = 1, stat = "identity") +
+            coord_polar("y") +
+            theme_void() +
+            labs(fill = "Cylinders")
+    })
+
+    # Line Graph
+    output$lineGraph <- renderPlot({
+        ggplot(mtcars, aes(x = wt, y = mpg)) +
+            geom_line() +
+            theme_minimal() +
+            labs(title = "Line Graph of MPG vs Weight", x = "Weight", y = "MPG")
+    })
+}
+
+# Run the application
+shinyApp(ui, server)
+
+
+
+```
+
+
+
+
+##################
+
+Dot nav
+```{r}
+
+library(shiny)
+library(shinydashboard)
+
+ui <- dashboardPage(
+    dashboardHeader(
+        # Header content
+    ),
+    dashboardSidebar(
+        # Sidebar content
+    ),
+    dashboardBody(
+        # Custom CSS for dots
+        tags$head(
+            tags$style(HTML("
+                .nav-dot {
+                    height: 10px;
+                    width: 10px;
+                    background-color: #bbb;
+                    border-radius: 50%;
+                    display: inline-block;
+                    margin: 2px;
+                }
+                .nav-dot.active {
+                    background-color: #717171;
+                }
+            ")),
+
+            # JavaScript for navigation
+            tags$script(HTML("
+                $(document).on('click', '.nav-dot', function() {
+                    var dotId = $(this).attr('id');
+                    // Navigation logic
+                    if(dotId === 'dot-1') {
+                        $('a[data-value=\"tech_adoptions_general_tab\"]').click();
+                    } else if(dotId === 'dot-2') {
+                        $('a[data-value=\"tech_usage_tab\"]').click();
+                    }
+                    // Update active dot
+                    $('.nav-dot').removeClass('active');
+                    $(this).addClass('active');
+                });
+            "))
+        ),
+
+        # Dot navigation UI
+        tags$div(id = "dot-navigation",
+            tags$div(id = "dot-1", class = "nav-dot active"),
+            tags$div(id = "dot-2", class = "nav-dot")
+            # ... More dots as needed
+        ),
+
+        # Rest of the dashboard body
+    )
+)
+
+server <- function(input, output, session) {
+    # Server logic
+}
+
+shinyApp(ui, server)
+
+
+
+```
+
+
